@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <script src="ease.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        var ease = new Ease("dummy2", "test2", "DnhtXHzhMkqrZtmdjWeUeatBNzBLbJ");
+
+        refreshMessages(ease);
+
+        var submitButton = $("#chatsubmit").submit(function() {
+          var inputText = $("#chatsubmit").text();
+          var messages = ease.read("/messages");
+          messages.append(inputText);
+          ease.save("/messages", messages);
+          refreshMessages(ease);
+        })
+      });
+
+      function refreshMessages(ease) {
+        var messageList = $("#messagelist");
+        messageList.empty();
+        var messages = ease.read("/messages");
+        console.log("Messages: " + messages);
+        if (messages == null) {
+          return;
+        }
+        for (var i = 0; i < messages.length; i++) {
+          messageList.append("<li>" + messages[i] + "</li>");
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Chat Demo!</h1>
+    <h2>Messages</h2>
+    <ul id="messagelist">
+    </ul>
+    <input type="text" id="chatinput">
+    <input type="submit" id="chatsubmit" value="Send message!">
+  </body>
+</html>
