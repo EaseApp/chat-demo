@@ -5,13 +5,15 @@
     <script>
       $(document).ready(function() {
         var ease = new Ease("dummy2", "test2", "DnhtXHzhMkqrZtmdjWeUeatBNzBLbJ");
+        window.ease = ease;
 
         refreshMessages(ease);
 
         $("#chatform").submit(function(evt) {
           evt.preventDefault();
           console.log('hi')
-          var inputText = $("#chatsubmit").text();
+          var inputText = $("#chatinput").val();
+          $("#chatinput").val("");
           var messages = ease.read("/messages");
           if (messages == null) {
             messages = [];
