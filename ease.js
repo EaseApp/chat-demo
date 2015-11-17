@@ -20,13 +20,13 @@ function Ease(username, appName, appToken) {
     //xhr.withCredentials = true;
     xhr.onreadystatechange = function() {
       if(xhr.readyState == 4) {
-        return xhr.responseText;
+        return JSON.parse(xhr.responseText);
       } else {
         console.error("Request failed. Status " + xhr.status);
       }
     }
     xhr.send(dataToSend);
-    return xhr.responseText;
+    return JSON.parse(xhr.responseText);
   }
 
   this.save = function(path, data) {
