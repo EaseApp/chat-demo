@@ -1,41 +1,55 @@
 <html>
   <head>
-    <script src="ease.js"></script>
+    <script src="http://ease-62q56ueo.cloudapp.net/libs/ease.js"></script>
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script>
       $(document).ready(function() {
         var ease = new Ease("dummy2", "test2", "DnhtXHzhMkqrZtmdjWeUeatBNzBLbJ");
+
+        // For messing around in the console.
         window.ease = ease;
 
         refreshMessages(ease);
 
         $("#chatform").submit(function(evt) {
+          console.log("Form submitted...")
           evt.preventDefault();
-          console.log('hi')
           var inputText = $("#chatinput").val();
           $("#chatinput").val("");
-          var messages = ease.read("/messages");
-          if (messages == null) {
-            messages = [];
-          }
-          messages.push(inputText);
-          console.log(ease.save("/messages", messages));
-          refreshMessages(ease);
+          ease.read("/messages", function(err, messages) {
+            if (err) {
+              console.log("Error reading messages.");
+              return;
+            }
+            if (messages == null) {
+              messages = [];
+            }
+            messages.push(inputText);
+            ease.save("/messages", messages, function(err) {
+              if (err) {
+                console.log("Error communicating with server.");
+                return;
+              }
+              refreshMessages(ease);
+            });
+          });
           return false;
         })
       });
 
       function refreshMessages(ease) {
+        console.log("Refreshing messages...");
         var messageList = $("#messagelist");
         messageList.empty();
-        var messages = ease.read("/messages");
-        console.log("Messages: " + messages);
-        if (messages == null || messages == "null") {
-          return;
-        }
-        for (var i = 0; i < messages.length; i++) {
-          messageList.append("<li>" + messages[i] + "</li>");
-        }
+        ease.read("/messages", function(err, messages) {
+          if (err || messages == null) {
+            return;
+          }
+          console.log("Messages: " + messages);
+          for (var i = 0; i < messages.length; i++) {
+            messageList.append("<li>" + messages[i] + "</li>");
+          }
+        });
       }
     </script>
 
