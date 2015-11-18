@@ -4,13 +4,17 @@
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script>
       $(document).ready(function() {
-        var ease = new Ease("dummy2", "test2", "DnhtXHzhMkqrZtmdjWeUeatBNzBLbJ");
+        var ease = new Ease("hi@example.com", "app", "buXOEAfmXmRwJHafvSFCpnXkNjZElH");
         ease.baseUrl = 'localhost:3001';
 
         // For messing around in the console.
         window.ease = ease;
 
         refreshMessages(ease);
+
+        setInterval(function() {
+          refreshMessages(ease);
+        }, 200);
 
         $("#chatform").submit(function(evt) {
           console.log("Form submitted...")
@@ -38,14 +42,19 @@
         })
       });
 
+      var messageCount = 0;
       function refreshMessages(ease) {
         console.log("Refreshing messages...");
         var messageList = $("#messagelist");
-        messageList.empty();
         ease.read("/messages", function(err, messages) {
           if (err || messages == null) {
             return;
           }
+          if (messageCount == messages.length) {
+            return;
+          }
+          messageCount = messages.length;
+          messageList.empty();
           console.log("Messages: " + messages);
           for (var i = 0; i < messages.length; i++) {
             messageList.append("<li>" + messages[i] + "</li>");
@@ -55,15 +64,12 @@
     </script>
 
     <style>
-      body {
-        margin-left: auto;
-        margin-right: auto;
-      }
       #messagelist {
         height: 200px;
         width: 200px;
         list-style-type: none;
         text-align: center;
+        padding-left: 0px;
       }
       #messagelist li {
         margin-bottom: 2px;
