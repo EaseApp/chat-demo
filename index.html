@@ -45,7 +45,8 @@
       var messageCount = 0;
       function refreshMessages(ease) {
         console.log("Refreshing messages...");
-        var messageList = $("#messagelist");
+        var messageList = $("#messagelist"),
+            frag = document.createDocumentFragment();
         ease.read("/messages", function(err, messages) {
           if (err || messages == null) {
             return;
@@ -57,8 +58,9 @@
           messageList.empty();
           console.log("Messages: " + messages);
           for (var i = 0; i < messages.length; i++) {
-            messageList.append("<li>" + messages[i] + "</li>");
+            frag.append("<li>" + messages[i] + "</li>");
           }
+          messageList.append(frag);
         });
       }
     </script>
