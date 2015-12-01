@@ -3,6 +3,9 @@
     <script src="http://ease-62q56ueo.cloudapp.net/libs/ease.js"></script>
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script>
+      var messagesScroll;
+      var initialLoad = true;
+
       $(document).ready(function() {
         //var ease = new Ease("hi@example.com", "app", "buXOEAfmXmRwJHafvSFCpnXkNjZElH");
         var ease = new Ease("hi@example.com", "testapp", "OZgSHtEozKjHCXZRpyuAOhfcSNiwHM");
@@ -12,6 +15,8 @@
 
         // For messing around in the console.
         window.ease = ease;
+
+        messagesScroll = $('#messagelist');
 
         refreshMessages(ease);
 
@@ -45,7 +50,7 @@
         })
       });
 
-      var messageCount = 0;
+      var messageCount, currentScroll, maxScrollHeight = 0;
       function refreshMessages(ease) {
         console.log("Refreshing messages...");
         var messageList = $("#messagelist");
@@ -56,24 +61,43 @@
           if (messageCount == messages.length) {
             return;
           }
+
+          currentScroll = messagesScroll.scrollTop();
+          maxScrollHeight = messagesScroll[0].scrollHeight;
+
           messageCount = messages.length;
           messageList.empty();
           console.log("Messages: " + messages);
           for (var i = 0; i < messages.length; i++) {
             messageList.append("<li>" + messages[i] + "</li>");
           }
+
+          if (initialLoad) {
+            messagesScroll.scrollTop(messagesScroll.prop("scrollHeight"));
+            initialLoad = false;
+            return;
+          }
+
+          if (currentScroll > (maxScrollHeight - 400)) {
+            messagesScroll.scrollTop(messagesScroll.prop("scrollHeight"));
+          }
+
         });
       }
     </script>
 
     <style>
+      body {
+        text-align: center;
+      }
       #messagelist {
         overflow: auto;
         height: 200px;
-        width: 200px;
+        width: 90%;
         list-style-type: none;
         text-align: center;
         padding-left: 0px;
+        margin: 10px auto;
       }
       #messagelist li {
         margin-bottom: 2px;
