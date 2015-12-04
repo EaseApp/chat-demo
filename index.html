@@ -1,119 +1,103 @@
 <html>
   <head>
-    <script src="http://ease-62q56ueo.cloudapp.net/libs/ease.js"></script>
+    <script src="http://easeapp.co/libs/ease.js"></script>
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script>
-      var messagesScroll;
-      var initialLoad = true;
+      var messageList = $("#messagelist");
+      messages = [];
 
       $(document).ready(function() {
-        //var ease = new Ease("hi@example.com", "app", "buXOEAfmXmRwJHafvSFCpnXkNjZElH");
-        var ease = new Ease("hi@example.com", "testapp", "OZgSHtEozKjHCXZRpyuAOhfcSNiwHM");
-
-        ease.baseUrl = '162.243.87.146:3001';
-        //ease.baseUrl = 'localhost:3001';
-
-        // For messing around in the console.
+        // var ease = new Ease("ronswanson", "test", "QgJSxjGVCNrQmBBxwlgmqhgxRIGHJJ", false);
+        var ease = new Ease("hi@example.com", "testapp", "OZgSHtEozKjHCXZRpyuAOhfcSNiwHM", true);
+	       // ease.baseUrl = '162.243.87.146:3001';
         window.ease = ease;
 
-        messagesScroll = $('#messagelist');
+        refreshMessages(ease, true); // Get history
 
-        refreshMessages(ease);
-
-        setInterval(function() {
-          refreshMessages(ease);
-        }, 200);
+	      ease.connect();
+        ease.subscribe(ease.appName);
+        ease.conn.onmessage = function(event){
+          var data = JSON.parse(event.data);
+          console.log("data:" + JSON.stringify(data)); // Shows all the data, looks pretty cool.
+          if (data["action"] != null){
+            console.log("You have new data");
+            updateMessages(data["data"])
+          }
+        };
 
         $("#chatform").submit(function(evt) {
-          console.log("Form submitted...")
           evt.preventDefault();
           var inputText = $("#chatinput").val();
           $("#chatinput").val("");
-          ease.read("/messages", function(err, messages) {
+
+          messages.push(inputText);
+          ease.save("/messages", messages, function(err) {
             if (err) {
-              console.log("Error reading messages.");
+              console.log("Error communicating with server.");
               return;
             }
-            if (messages == null) {
-              messages = [];
-            }
-            messages.push(inputText);
-            ease.save("/messages", messages, function(err) {
-              if (err) {
-                console.log("Error communicating with server.");
-                return;
-              }
-              refreshMessages(ease);
-            });
           });
           return false;
         })
       });
 
-      var messageCount, currentScroll, maxScrollHeight = 0;
-      function refreshMessages(ease) {
-        console.log("Refreshing messages...");
-        var messageList = $("#messagelist");
-        ease.read("/messages", function(err, messages) {
-          if (err || messages == null) {
-            return;
+      function refreshMessages(ease, updateNow) {
+        return ease.read("/messages", function(err, _messages) {
+          if (err === null){
+              messages = _messages;
+              if (updateNow){
+                  updateMessages(messages);
+              }
           }
-          if (messageCount == messages.length) {
-            return;
-          }
-
-          currentScroll = messagesScroll.scrollTop();
-          maxScrollHeight = messagesScroll[0].scrollHeight;
-
-          messageCount = messages.length;
-          messageList.empty();
-          console.log("Messages: " + messages);
-          for (var i = 0; i < messages.length; i++) {
-            messageList.append("<li>" + messages[i] + "</li>");
-          }
-
-          if (initialLoad) {
-            messagesScroll.scrollTop(messagesScroll.prop("scrollHeight"));
-            initialLoad = false;
-            return;
-          }
-
-          if (currentScroll > (maxScrollHeight - 400)) {
-            messagesScroll.scrollTop(messagesScroll.prop("scrollHeight"));
-          }
-
         });
+      }
+
+      function updateMessages(_messages){
+        messageList, frag = document.createDocumentFragment();
+        messageCount = _messages.length;
+        messageList.empty();
+        console.log("Messages: " + _messages);
+        for (var i = 0; i < _messages.length; i++) {
+          var li = document.createElement("li")
+          li.textContent = _messages[i]
+          frag.appendChild(li);
+        }
+        var elem = document.getElementById("messagelist")
+        elem.appendChild(frag);
+        elem.scrollTop = elem.scrollHeight;
       }
     </script>
 
     <style>
-      body {
-        text-align: center;
-      }
       #messagelist {
-        overflow: auto;
         height: 200px;
-        width: 90%;
+        width: 100%;
+        min-width: 300px;
         list-style-type: none;
-        text-align: center;
         padding-left: 0px;
-        margin: 10px auto;
+        overflow: auto;
+        border: 1px solid #bbb;
       }
       #messagelist li {
-        margin-bottom: 2px;
+        margin-top: 2px;
         background-color: #ddd;
+        padding-left:3px;
+      }
+
+      body{
+        font-family:Verdana;
       }
     </style>
-
   </head>
   <body>
-    <h1>Chat Demo!</h1>
+    <h1>Ease Chat Demo!</h1>
     <h2>Messages</h2>
     <ul id="messagelist">
     </ul>
     <form id="chatform">
-      <input type="text" id="chatinput">
+      <input type="text" id="chatinput" autofocus>
       <input type="submit" value="Send message!">
     </form>
   </body>
 </html>
+
