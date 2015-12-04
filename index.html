@@ -4,6 +4,7 @@
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script>
       var messageList = $("#messagelist");
+      var currentScroll, maxScrollHeight = 0;
       messages = [];
 
       $(document).ready(function() {
@@ -12,15 +13,17 @@
 	       // ease.baseUrl = '162.243.87.146:3001';
         window.ease = ease;
 
+        messagesScroll = $('#messagelist');
+
         refreshMessages(ease, true); // Get history
 
 	      ease.connect();
         ease.subscribe(ease.appName);
         ease.conn.onmessage = function(event){
           var data = JSON.parse(event.data);
-          console.log("data:" + JSON.stringify(data)); // Shows all the data, looks pretty cool.
+          // console.log("data:" + JSON.stringify(data)); // Shows all the data, looks pretty cool.
           if (data["action"] != null){
-            console.log("You have new data");
+            // console.log("You have new data");
             updateMessages(data["data"])
           }
         };
@@ -54,9 +57,13 @@
 
       function updateMessages(_messages){
         messageList, frag = document.createDocumentFragment();
+
+        currentScroll = messagesScroll.scrollTop();
+        maxScrollHeight = messagesScroll[0].scrollHeight;
+
         messageCount = _messages.length;
         messageList.empty();
-        console.log("Messages: " + _messages);
+        // console.log("Messages: " + _messages);
         for (var i = 0; i < _messages.length; i++) {
           var li = document.createElement("li")
           li.textContent = _messages[i]
@@ -64,7 +71,13 @@
         }
         var elem = document.getElementById("messagelist")
         elem.appendChild(frag);
-        elem.scrollTop = elem.scrollHeight;
+
+        // elem.scrollTop = elem.scrollHeight;
+
+
+        if (currentScroll > (maxScrollHeight - 400)) {
+          messagesScroll.scrollTop(messagesScroll.prop("scrollHeight"));
+        }
       }
     </script>
 
@@ -100,4 +113,3 @@
     </form>
   </body>
 </html>
-
