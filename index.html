@@ -5,13 +5,14 @@
     <script>
       var messageList = $("#messagelist");
       var currentScroll, maxScrollHeight = 0;
-      messages = [];
 
       $(document).ready(function() {
         // var ease = new Ease("ronswanson", "test", "QgJSxjGVCNrQmBBxwlgmqhgxRIGHJJ", false);
         var ease = new Ease("easetestuser@example.com", "testapp", "JzlaHSLCZdFDqKjYLonmyjFkhXFkYY", true);
 	       // ease.baseUrl = '162.243.87.146:3001';
         window.ease = ease;
+	var messages = [];
+	console.log(messages);
 
         messagesScroll = $('#messagelist');
 
@@ -56,6 +57,10 @@
       }
 
       function updateMessages(_messages){
+	if (_messages == null){
+		_messages = [];
+	}
+
         messageList, frag = document.createDocumentFragment();
 
         currentScroll = messagesScroll.scrollTop();
