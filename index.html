@@ -3,85 +3,86 @@
     <script src="http://easeapp.co/libs/ease.js"></script>
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script>
-      var messageList = $("#messagelist");
       var currentScroll, maxScrollHeight = 0;
+      var globalMessages = [];
+
+      // START DEMO CODE.
 
       $(document).ready(function() {
-        // var ease = new Ease("ronswanson", "test", "QgJSxjGVCNrQmBBxwlgmqhgxRIGHJJ", false);
+
         var ease = new Ease("easetestuser@example.com", "testapp", "JzlaHSLCZdFDqKjYLonmyjFkhXFkYY", true);
-	       // ease.baseUrl = '162.243.87.146:3001';
         window.ease = ease;
-	var messages = [];
-	console.log(messages);
 
-        messagesScroll = $('#messagelist');
+        // Load the messages from Ease.
+        ease.read('/messages', function(err, messages) {
+          if (err) {
+            console.log('Error reading /messages: ' + err);
+            return;
+          }
+          updateMessages(messages);
+          setUpFormSubmit();
+        });
 
-        refreshMessages(ease, true); // Get history
-
-	      ease.connect();
+        ease.connect();
         ease.subscribe(ease.appName);
         ease.conn.onmessage = function(event){
-          var data = JSON.parse(event.data);
-          // console.log("data:" + JSON.stringify(data)); // Shows all the data, looks pretty cool.
-          if (data["action"] != null){
-            // console.log("You have new data");
-            updateMessages(data["data"])
+          var resp = JSON.parse(event.data);
+          if (resp.path === '/messages') {
+            updateMessages(resp.data);
           }
         };
 
-        $("#chatform").submit(function(evt) {
-          evt.preventDefault();
-          var inputText = $("#chatinput").val();
-          $("#chatinput").val("");
-
-          messages.push(inputText);
-          ease.save("/messages", messages, function(err) {
-            if (err) {
-              console.log("Error communicating with server.");
-              return;
-            }
-          });
-          return false;
-        })
       });
 
-      function refreshMessages(ease, updateNow) {
-        return ease.read("/messages", function(err, _messages) {
-          if (err === null){
-              messages = _messages;
-              if (updateNow){
-                  updateMessages(messages);
-              }
+      // Submits a message to Ease.
+      function submitMessage(inputText) {
+        globalMessages.push(inputText);
+        ease.save("/messages", globalMessages, function(err) {
+          if (err) {
+            console.log("Error communicating with server.");
+            return;
           }
         });
       }
 
-      function updateMessages(_messages){
-	if (_messages == null){
-		_messages = [];
+      // END DEMO CODE.
+
+
+      // Adds listener to allow sending messages.
+      function setUpFormSubmit() {
+        $("#chatform").submit(function(evt) {
+          evt.preventDefault();
+          var inputText = $("#chatinput").val();
+          $("#chatinput").val("");
+          submitMessage(inputText);
+          return false;
+        });
+      }
+
+      // Updates the message list to contain the given messages.
+      function updateMessages(messages){
+        var messagesContainer = $('#messagelist');
+	if (!messages){
+          messages = [];
 	}
+        globalMessages = messages;
 
-        messageList, frag = document.createDocumentFragment();
+        var frag = document.createDocumentFragment();
 
-        currentScroll = messagesScroll.scrollTop();
-        maxScrollHeight = messagesScroll[0].scrollHeight;
+        currentScroll = messagesContainer.scrollTop();
+        maxScrollHeight = messagesContainer[0].scrollHeight;
 
-        messageCount = _messages.length;
-        $('#messagelist').empty();
-        // console.log("Messages: " + _messages);
-        for (var i = 0; i < _messages.length; i++) {
+        messagesContainer.empty();
+        for (var i = 0; i < messages.length; i++) {
           var li = document.createElement("li")
-          li.textContent = _messages[i]
+          li.textContent = messages[i]
           frag.appendChild(li);
         }
         var elem = document.getElementById("messagelist")
         elem.appendChild(frag);
 
-        // elem.scrollTop = elem.scrollHeight;
-
-
         if (currentScroll > (maxScrollHeight - 400)) {
-          messagesScroll.scrollTop(messagesScroll.prop("scrollHeight"));
+          messagesContainer.scrollTop(messagesContainer.prop("scrollHeight"));
         }
       }
     </script>
