@@ -27,7 +27,12 @@
         ease.subscribe(ease.appName);
         ease.conn.onmessage = function(event){
           var resp = JSON.parse(event.data);
-          if (resp.path === '/messages') {
+          console.log(resp);
+          if (resp.action == "DELETE"){
+            updateMessages(resp.data);
+            console.log("Delete action has been receieved.");
+          }
+          else if (resp.action == "SAVE") {
             updateMessages(resp.data);
           }
         };
